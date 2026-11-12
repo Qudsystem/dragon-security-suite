@@ -1,0 +1,156 @@
+# Implementation Plan
+
+- [x] 1. Write bug condition exploration test
+  - **Property 1: Bug Condition** - Chat Response Delivery Failure
+  - **CRITICAL**: This test MUST FAIL on unfixed code - failure confirms the bug exists
+  - **DO NOT attempt to fix the test or the code when it fails**
+  - **NOTE**: This test encodes the expected behavior - it will validate the fix when it passes after implementation
+  - **GOAL**: Surface counterexamples that demonstrate the bug exists
+  - **Scoped PBT Approach**: Scope the property to concrete failing cases: chat messages sent when Ollama is unreachable due to networking, WebSocket disconnects during processing, or validation rules are empty
+  - Test that chat messages fail to receive LLM responses when:
+    - Gateway runs in Podman container with default networking and tries to reach http://127.0.0.1:11434
+    - WebSocket heartbeat timeout (5s) expires during LLM processing (>5s)
+    - ValidationManager has empty rules array
+    - Error details are not logged with connection diagnostics
+  - The test assertions should match the Expected Behavior Properties from design:
+    - `result.llmResponseDelivered == TRUE`
+    - `result.websocketStable == TRUE`
+    - `result.errorDetailsLogged == TRUE`
+    - `result.validationRulesLoaded == TRUE`
+  - Run test on UNFIXED code
+  - **EXPECTED OUTCOME**: Test FAILS (this is correct - it proves the bug exists)
+  - Document counterexamples found:
+    - Connection refused when calling http://127.0.0.1:11434 from Podman container
+    - WebSocket disconnects during long-running LLM calls
+    - Generic error messages without diagnostic information
+    - Empty validation rules array in frontend
+  - Mark task complete when test is written, run, and failure is documented
+  - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6_
+
+- [x] 2. Write preservation property tests (BEFORE implementing fix)
+  - **Property 2: Preservation** - Non-LLM Chat Functionality
+  - **IMPORTANT**: Follow observation-first methodology
+  - Observe behavior on UNFIXED code for non-buggy inputs (operations that do NOT require LLM response generation)
+  - Write property-based tests capturing observed behavior patterns from Preservation Requirements:
+    - Session management operations (create, list, delete, pin, archive, rename) persist to file storage
+    - Command parsing for "pensec" commands (tasks, config, analytics, rd, legal) returns hardcoded responses
+    - Tool execution commands ("/run nmap target") parse and execute with authorization
+    - WebSocket authentication and channel subscription (agent_chat, approvals, task_updates) works correctly
+    - Agent workflow events (agent_thought, agent_action, agent_observation) update UI properly
+    - File upload analysis parses JSON and text files correctly
+  - Property-based testing generates many test cases for stronger guarantees
+  - Run tests on UNFIXED code
+  - **EXPECTED OUTCOME**: Tests PASS (this confirms baseline behavior to preserve)
+  - Mark task complete when tests are written, run, and passing on unfixed code
+  - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7_
+
+- [x] 3. Fix for chat response delivery failure
+
+  - [x] 3.1 Configure Podman networking for Ollama connectivity
+    - Update `Cerberus/gateway/config.py` to detect Podman container environment
+    - Add computed property that checks for `/.dockerenv` or `CONTAINER` env var
+    - Replace `127.0.0.1` with `host.containers.internal` when in container
+    - Add `OLLAMA_HOST_OVERRIDE` env var for manual configuration
+    - Add connection diagnostic settings: `LLM_CONNECTION_TIMEOUT`, `LLM_CONNECTION_RETRIES`, `LLM_DNS_RESOLUTION_TIMEOUT`
+    - Update startup scripts (`bat/START-DRAGON-R1-PODMAN.bat`) to pass `-e OLLAMA_URL=http://host.containers.internal:11434`
+    - Add `--network=host` option or `extra_hosts: ["host.containers.internal:host-gateway"]` to podman-compose.yml
+    - _Bug_Condition: isBugCondition(input) where ollamaConnectionFails(input) == TRUE (gateway in Podman, Ollama URL is localhost, connection refused)_
+    - _Expected_Behavior: expectedBehavior(result) where result.llmResponseDelivered == TRUE_
+    - _Preservation: Session management, command parsing, WebSocket auth remain unchanged_
+    - _Requirements: 1.2, 2.2_
+
+  - [x] 3.2 Increase WebSocket heartbeat timeout
+    - Update `Cerberus/dragon-ui/src/lib/websocket.ts` line 293
+    - Change heartbeat timeout from 5000ms to 15000ms
+    - Add message tracking with `lastMessageSentAt` timestamp
+    - Pause heartbeat timeout if message was sent within last 60 seconds
+    - Resume normal heartbeat after response received or 60s timeout
+    - Verify exponential backoff is working correctly (already implemented at line 186)
+    - _Bug_Condition: isBugCondition(input) where websocketDisconnects(input) == TRUE (heartbeat timeout < 5000ms, PONG not received)_
+    - _Expected_Behavior: expectedBehavior(result) where result.websocketStable == TRUE_
+    - _Preservation: WebSocket authentication, channel subscription, event handling remain unchanged_
+    - _Requirements: 1.1, 1.4, 1.5, 2.1, 2.5_
+
+  - [x] 11Enhance error logging in LLM adapter
+    - Update `Cerberus/gateway/adapters/llm_adapter.py` in `HybridLLMRouter._call_ollama()`
+    - Wrap httpx calls with detailed exception handling
+    - Log exact URL being called, connection timeout vs DNS failure vs HTTP error
+    - Log response status code and body on HTTP errors
+    - Add connection diagnostics before calling Ollama (DNS check, TCP check)
+    - Implement fallback to cloud LLM if Ollama fails and `cloud_base_url` is configured
+    - Include diagnostic details in exception message
+    - _Bug_Condition: isBugCondition(input) where errorDetailsNotLogged(input) == TRUE (LLM adapter fails without detailed logging)_
+    - _Expected_Behavior: expectedBehavior(result) where result.errorDetailsLogged == TRUE_
+    - _Preservation: Successful LLM calls continue to work identically_
+    - _Requirements: 1.3, 2.3, 2.7_
+
+  - [x] 3.4 Enhance error propagation in chat service
+    - Update `Cerberus/gateway/services/chat_service.py` in `ChatService._generate_response()`
+    - Catch `httpx.ConnectError` separately from other exceptions
+    - For connection errors, include URL and suggest checking Ollama status
+    - For timeout errors, suggest increasing timeout or checking Ollama performance
+    - For DNS errors, suggest checking network configuration
+    - Return structured error messages with error type, failed URL, and remediation steps
+    - Example: "Ollama connection failed at http://host.containers.internal:11434 - verify Ollama is running on host with 'ollama list'"
+    - _Bug_Condition: isBugCondition(input) where errorDetailsNotLogged(input) == TRUE (chat service returns generic error)_
+    - _Expected_Behavior: expectedBehavior(result) where result.errorDetailsLogged == TRUE_
+    - _Preservation: Successful chat message processing continues to work identically_
+    - _Requirements: 1.3, 2.3, 2.4, 2.7_
+
+  - [x] 3.5 Create validation rules endpoint
+    - Add `/api/v1/validation/rules` endpoint in `Cerberus/gateway/main.py`
+    - Return array of validation rule definitions
+    - Include schemas for: chatMessage, login, register, createProject, createTask, file, generateReport, approvalDecision
+    - Each rule includes: id, enabled, priority, schema definition (as JSON schema)
+    - Cache response for 5 minutes to reduce overhead
+    - _Bug_Condition: isBugCondition(input) where validationRulesEmpty() == TRUE (endpoint not found or returns empty array)_
+    - _Expected_Behavior: expectedBehavior(result) where result.validationRulesLoaded == TRUE_
+    - _Preservation: Existing API endpoints continue to work identically_
+    - _Requirements: 1.6, 2.6_
+
+  - [x] 3.6 Update ValidationManager to handle empty responses
+    - Update `Cerberus/dragon-ui/src/lib/validation/ValidationManager.ts` in `pollForRuleUpdates()`
+    - Add check for empty array at line 75: `if (updatedRules.length === 0)`
+    - Log debug message instead of warning for empty array
+    - Don't clear existing rules if API returns empty array
+    - Implement fallback to default rules if API fails after 3 attempts
+    - Keep existing default rules from schemas.ts
+    - Only update rules if API returns valid non-empty array
+    - _Bug_Condition: isBugCondition(input) where validationRulesEmpty() == TRUE (API returns empty or fails)_
+    - _Expected_Behavior: expectedBehavior(result) where result.validationRulesLoaded == TRUE_
+    - _Preservation: Existing validation logic for successful API responses continues to work identically_
+    - _Requirements: 1.6, 2.6_
+
+  - [x] 3.7 Verify bug condition exploration test now passes
+    - **Property 1: Expected Behavior** - Chat Response Delivery Success
+    - **IMPORTANT**: Re-run the SAME test from task 1 - do NOT write a new test
+    - The test from task 1 encodes the expected behavior
+    - When this test passes, it confirms the expected behavior is satisfied
+    - Run bug condition exploration test from step 1
+    - **EXPECTED OUTCOME**: Test PASSES (confirms bug is fixed)
+    - Verify all expected behaviors:
+      - LLM responses are delivered successfully
+      - WebSocket connections remain stable during processing
+      - Error details are logged with connection diagnostics
+      - Validation rules are loaded from API
+    - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7_
+
+  - [x] 3.8 Verify preservation tests still pass
+    - **Property 2: Preservation** - Non-LLM Chat Functionality
+    - **IMPORTANT**: Re-run the SAME tests from task 2 - do NOT write new tests
+    - Run preservation property tests from step 2
+    - **EXPECTED OUTCOME**: Tests PASS (confirms no regressions)
+    - Confirm all tests still pass after fix:
+      - Session management operations work identically
+      - Command parsing works identically
+      - Tool execution works identically
+      - WebSocket authentication works identically
+      - Agent workflow events work identically
+      - File upload analysis works identically
+
+- [x] 4. Checkpoint - Ensure all tests pass
+  - Run complete test suite (backend + frontend)
+  - Verify all property-based tests pass
+  - Verify all preservation tests pass
+  - Verify no regressions in existing functionality
+  - If any issues arise, consult with user before proceeding
