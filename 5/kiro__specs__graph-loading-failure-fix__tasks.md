@@ -1,0 +1,123 @@
+# Implementation Plan
+
+- [x] 1. Write bug condition exploration test
+  - **Property 1: Bug Condition** - Backend Offline Shows Generic Error
+  - **CRITICAL**: This test MUST FAIL on unfixed code - failure confirms the bug exists
+  - **DO NOT attempt to fix the test or the code when it fails**
+  - **NOTE**: This test encodes the expected behavior - it will validate the fix when it passes after implementation
+  - **GOAL**: Surface counterexamples that demonstrate the bug exists
+  - **Scoped PBT Approach**: Scope the property to concrete failing case - user navigates to `/graph` when backend is offline
+  - Test implementation: Mock backend offline (network error), navigate to graph page, assert specific error message is shown
+  - The test assertions should match the Expected Behavior Properties from design:
+    - Error message includes "Backend gateway is offline"
+    - Error message includes "Please start the Dragon-R1 gateway service"
+    - Instructions show startup commands (START-DRAGON-R1.bat or start-dragon-r1.sh)
+  - Run test on UNFIXED code
+  - **EXPECTED OUTCOME**: Test FAILS (this is correct - it proves the bug exists, showing generic "Failed to load" instead of specific backend offline message)
+  - Document counterexamples found: "Generic error 'Failed to load the attack graph right now' shown instead of 'Backend gateway is offline'"
+  - Mark task complete when test is written, run, and failure is documented
+  - _Requirements: 1.1, 2.1_
+
+- [x] 2. Write preservation property tests (BEFORE implementing fix)
+  - **Property 2: Preservation** - Non-Buggy Scenarios Remain Unchanged
+  - **IMPORTANT**: Follow observation-first methodology
+  - Observe behavior on UNFIXED code for non-buggy inputs (backend online scenarios)
+  - Write property-based tests capturing observed behavior patterns from Preservation Requirements:
+    - Test 1: Healthy backend + healthy Neo4j → graph loads and displays correctly
+    - Test 2: Healthy backend + degraded Neo4j → shows "Graph database is offline" (not "Backend offline")
+    - Test 3: Healthy backend + empty graph → shows "No graph data has been indexed yet"
+    - Test 4: Retry button → re-fetches data and re-checks health status
+    - Test 5: WebSocket connected → subscribes to graph_update, node_discovery, vulnerability_alert channels
+    - Test 6: Graph interactions → node details display in sidebar, all visualization features work
+  - Property-based testing generates many test cases for stronger guarantees
+  - Run tests on UNFIXED code
+  - **EXPECTED OUTCOME**: Tests PASS (this confirms baseline behavior to preserve)
+  - Mark task complete when tests are written, run, and passing on unfixed code
+  - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
+
+- [-] 3. Fix for graph loading failure when backend is offline
+
+  - [ ] 3.0 Run Gemini CLI audit on api.ts (BEFORE implementation)
+    - **CRITICAL**: Run this BEFORE starting any implementation tasks
+    - Execute Gemini CLI to audit `Cerberus/dragon-ui/src/lib/api.ts`
+    - Read Gemini's suggestions from terminal output
+    - Analyze suggestions for conflicts with planned implementation
+    - If conflicts exist, ask user for decision before proceeding
+    - Document Gemini's recommendations to incorporate into implementation
+    - Mark task complete when audit is reviewed and conflicts resolved
+
+  - [ ] 3.1 Add error classification logic to API client
+    - Modify `Cerberus/dragon-ui/src/lib/api.ts`
+    - Add `ErrorType` enum: BACKEND_OFFLINE, NEO4J_DEGRADED, EMPTY_GRAPH, UNKNOWN
+    - Implement `classifyError(error, healthStatus)` function
+    - Detect network errors: ECONNREFUSED, ETIMEDOUT, NetworkError, fetch failures
+    - Distinguish from HTTP errors (4xx, 5xx responses)
+    - Implement port-agnostic base URL resolution using `window.location`
+    - _Bug_Condition: isBugCondition(request) = (request.target = "/graph") AND (backend_gateway.status = "offline" OR unreachable = true)_
+    - _Expected_Behavior: Detect and classify network errors, distinguish from other error types_
+    - _Preservation: Must not affect error handling when backend is online_
+    - _Requirements: 1.2, 1.5, 2.2, 2.5_
+
+  - [ ] 3.2 Update graph page error messaging
+    - Modify `Cerberus/dragon-ui/src/app/graph/page.tsx`
+    - Add conditional error message rendering based on ErrorType
+    - For BACKEND_OFFLINE: Display "Backend gateway is offline. Please start the Dragon-R1 gateway service."
+    - Include startup instructions: "Run `START-DRAGON-R1.bat` (Windows) or `./start-dragon-r1.sh` (Linux/Mac)"
+    - For NEO4J_DEGRADED: Keep existing "Graph database is offline" message
+    - For EMPTY_GRAPH: Keep existing "No graph data has been indexed yet" message
+    - Display WebSocket connection status prominently
+    - _Bug_Condition: Generic error shown when backend offline_
+    - _Expected_Behavior: Clear, actionable error messages with instructions_
+    - _Preservation: Existing error messages for Neo4j degraded and empty graph unchanged_
+    - _Requirements: 1.1, 1.3, 1.4, 2.1, 2.3, 2.4, 3.2, 3.3_
+
+  - [ ] 3.3 Expose WebSocket connection state
+    - Modify `Cerberus/dragon-ui/src/lib/websocket.ts`
+    - Add public getter for connection state
+    - Provide disconnection reason (backend offline vs. other)
+    - Ensure reconnection attempts are trackable
+    - _Bug_Condition: WebSocket fails without clear UI feedback_
+    - _Expected_Behavior: Connection status visible, reconnection attempts shown_
+    - _Preservation: Real-time updates continue to work when backend is online_
+    - _Requirements: 1.3, 2.3, 3.5_
+
+  - [ ] 3.4 Update Zustand store for connectivity state
+    - Modify `Cerberus/dragon-ui/src/lib/store.ts`
+    - Add `backendConnectivity` state field
+    - Add `errorType` state field
+    - Track connection status changes
+    - _Bug_Condition: No centralized connectivity state tracking_
+    - _Expected_Behavior: Store tracks backend connectivity and error types_
+    - _Preservation: Existing store functionality unchanged_
+    - _Requirements: 1.2, 1.4, 2.2, 2.4_
+
+  - [ ] 3.5 Verify bug condition exploration test now passes
+    - **Property 1: Expected Behavior** - Backend Offline Shows Specific Error
+    - **IMPORTANT**: Re-run the SAME test from task 1 - do NOT write a new test
+    - The test from task 1 encodes the expected behavior
+    - When this test passes, it confirms the expected behavior is satisfied
+    - Run bug condition exploration test from step 1
+    - **EXPECTED OUTCOME**: Test PASSES (confirms bug is fixed - specific backend offline message now shown)
+    - Verify error message includes "Backend gateway is offline"
+    - Verify startup instructions are displayed
+    - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
+
+  - [ ] 3.6 Verify preservation tests still pass
+    - **Property 2: Preservation** - Non-Buggy Scenarios Still Work
+    - **IMPORTANT**: Re-run the SAME tests from task 2 - do NOT write new tests
+    - Run preservation property tests from step 2
+    - **EXPECTED OUTCOME**: Tests PASS (confirms no regressions)
+    - Confirm healthy backend + healthy Neo4j still loads graph correctly
+    - Confirm healthy backend + degraded Neo4j shows correct Neo4j-specific message
+    - Confirm empty graph state unchanged
+    - Confirm retry functionality works
+    - Confirm WebSocket subscriptions work
+    - Confirm graph interactions preserved
+
+- [ ] 4. Checkpoint - Ensure all tests pass
+  - Run complete test suite: `npm test` from `Cerberus/dragon-ui/`
+  - Verify all property-based tests pass
+  - Verify no regressions in existing tests
+  - Test manually: Stop backend, navigate to /graph, verify clear error message
+  - Test manually: Start backend, verify graph loads correctly
+  - Ask user if questions arise or if additional testing is needed
