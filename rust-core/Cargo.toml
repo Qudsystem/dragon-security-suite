@@ -1,0 +1,55 @@
+[package]
+name = "protect-x-core"
+version = "0.1.0"
+edition = "2021"
+authors = ["Protect X Team"]
+description = "High-performance cybersecurity core engine"
+
+[dependencies]
+# Async runtime
+tokio = { version = "1.35", features = ["full"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Database
+surrealdb = "1.1"
+
+# Networking
+tonic = "0.10"
+prost = "0.12"
+
+# Utilities
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.6", features = ["v4", "serde"] }
+bytes = "1.5"
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Configuration
+config = "0.13"
+toml = "0.8"
+
+[dev-dependencies]
+# Testing
+proptest = "1.4"
+criterion = "0.5"
+
+[[bench]]
+name = "benchmarks"
+harness = false
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+
+[profile.dev]
+opt-level = 0
+debug = true
