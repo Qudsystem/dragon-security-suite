@@ -1,0 +1,57 @@
+# Rust
+/rust-core/target/
+**/*.rs.bk
+Cargo.lock
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data
+/data/*.json
+/data/*.db
+/data/mitre_attack/
+
+# Logs
+*.log
+logs/
+
+# Secrets
+.env
+*.key
+*.pem
+*.crt
+
+# SurrealDB
+*.surreal
+
+# Temporary
+tmp/
+temp/
+*.tmp
