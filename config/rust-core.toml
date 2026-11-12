@@ -1,0 +1,35 @@
+# Protect X - Rust Core Configuration
+
+[server]
+host = "127.0.0.1"
+port = 50051
+max_connections = 1000
+
+[database]
+url = "ws://127.0.0.1:8000"
+namespace = "protect_x"
+database = "security"
+username = "root"
+password = "root"
+
+[monitoring]
+# eBPF sensor configuration
+tetragon_socket = "/var/run/tetragon/tetragon.sock"
+event_buffer_size = 10000
+max_events_per_second = 10000
+
+[performance]
+# Performance targets
+max_event_latency_us = 100
+max_query_latency_ms = 1000
+max_response_latency_ms = 500
+
+[resources]
+# Resource limits
+max_ram_mb = 4096
+max_cpu_percent = 3
+
+[logging]
+level = "info"
+format = "json"
+output = "stdout"
