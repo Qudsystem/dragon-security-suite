@@ -1,0 +1,288 @@
+- generic [active] [ref=e1]:
+  - region "Notifications alt+T"
+  - generic [ref=e3]:
+    - complementary [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - button "Toggle sidebar" [ref=e10]:
+            - generic:
+              - img
+              - img
+          - generic [ref=e11]:
+            - generic [ref=e12]:
+              - paragraph [ref=e473]: Dragon-R1
+              - paragraph [ref=e474]: Adaptive command surface
+            - generic [ref=e475]:
+              - generic [ref=e476]: restricted
+              - generic [ref=e477]: wsl
+        - generic [ref=e19]:
+          - generic [ref=e20]:
+            - paragraph [ref=e21]: Queue
+            - paragraph [ref=e22]: "0"
+          - generic [ref=e23]:
+            - paragraph [ref=e24]: Approvals
+            - paragraph [ref=e25]: "0"
+          - generic [ref=e26]:
+            - paragraph [ref=e27]: High Risk
+            - paragraph [ref=e28]: "0"
+      - generic [ref=e29]:
+        - generic [ref=e30]:
+          - paragraph [ref=e31]: Main
+          - generic [ref=e32]:
+            - link "Dashboard" [ref=e33] [cursor=pointer]:
+              - /url: /
+              - img [ref=e35]
+              - paragraph [ref=e41]: Dashboard
+            - link "Projects" [ref=e42] [cursor=pointer]:
+              - /url: /projects
+              - img [ref=e44]
+              - paragraph [ref=e47]: Projects
+            - link "Chat" [ref=e48] [cursor=pointer]:
+              - /url: /chat
+              - img [ref=e50]
+              - paragraph [ref=e53]: Chat
+            - link "Graph" [ref=e54] [cursor=pointer]:
+              - /url: /graph
+              - img [ref=e56]
+              - paragraph [ref=e62]: Graph
+            - link "Reports" [ref=e63] [cursor=pointer]:
+              - /url: /reports
+              - img [ref=e65]
+              - paragraph [ref=e69]: Reports
+            - link "Tools" [ref=e70] [cursor=pointer]:
+              - /url: /tools
+              - img [ref=e72]
+              - paragraph [ref=e75]: Tools
+            - link "Red Team" [ref=e76] [cursor=pointer]:
+              - /url: /red-team
+              - img [ref=e78]
+              - paragraph [ref=e81]: Red Team
+        - generic [ref=e82]:
+          - paragraph [ref=e83]: System
+          - generic [ref=e84]:
+            - link "Security" [ref=e85] [cursor=pointer]:
+              - /url: /admin/security
+              - img [ref=e87]
+              - paragraph [ref=e90]: Security
+            - link "Monitoring" [ref=e91] [cursor=pointer]:
+              - /url: /admin/monitoring
+              - img [ref=e93]
+              - paragraph [ref=e96]: Monitoring
+            - link "Settings" [ref=e97] [cursor=pointer]:
+              - /url: /settings
+              - img [ref=e99]
+              - paragraph [ref=e103]: Settings
+      - generic [ref=e104]:
+        - generic [ref=e105]:
+          - generic [ref=e106]:
+            - paragraph [ref=e107]: System health
+            - paragraph [ref=e108]: healthy
+          - img [ref=e109]
+        - generic [ref=e112]:
+          - generic [ref=e113]:
+            - generic [ref=e114]:
+              - img [ref=e115]
+              - text: Alerts
+            - generic [ref=e119]: "0"
+          - generic [ref=e199]:
+            - generic [ref=e200]: gateway
+            - generic [ref=e201]: healthy
+          - generic [ref=e202]:
+            - generic [ref=e203]: pentagi
+            - generic [ref=e204]: healthy
+          - generic [ref=e205]:
+            - generic [ref=e206]: mem0
+            - generic [ref=e207]: healthy
+          - generic [ref=e208]:
+            - generic [ref=e209]: rag
+            - generic [ref=e210]: healthy
+    - generic [ref=e120]:
+      - generic [ref=e212]:
+        - generic [ref=e214]:
+          - heading "Dragon-R1" [level=1] [ref=e215]
+          - generic [ref=e216]: Enhanced
+          - generic [ref=e217]:
+            - img [ref=e478]
+            - generic [ref=e222]: Connected
+          - generic [ref=e223]:
+            - img [ref=e224]
+            - generic [ref=e226]: Manual
+        - generic [ref=e228]:
+          - combobox [ref=e230]:
+            - generic [ref=e231]:
+              - img [ref=e233]
+              - generic [ref=e235]:
+                - generic [ref=e236]: Runtime
+                - generic [ref=e237]: WSL
+            - img [ref=e238]
+          - generic [ref=e240]:
+            - img [ref=e241]
+            - generic [ref=e244]:
+              - generic [ref=e245]: Load
+              - generic [ref=e246]: 34/36
+          - combobox [ref=e249]:
+            - generic [ref=e250]:
+              - img [ref=e252]
+              - generic [ref=e255]:
+                - generic [ref=e256]: LLM
+                - generic [ref=e258]: Deepseek R1:1.5b
+              - generic [ref=e260]: Local
+            - img [ref=e261]
+        - generic [ref=e263]:
+          - button [ref=e265]:
+            - img
+          - button "Notifications" [ref=e267]:
+            - img
+          - button [ref=e269]:
+            - img
+      - main [ref=e134]:
+        - generic [ref=e135]:
+          - generic [ref=e136]:
+            - generic [ref=e138]:
+              - img [ref=e140]
+              - generic [ref=e142]:
+                - heading "Command Chat" [level=1] [ref=e143]
+                - paragraph [ref=e144]: A focused conversation surface without extra side panels.
+            - button "Research mode off" [ref=e145]:
+              - img
+              - text: Research mode off
+          - generic [ref=e147]:
+            - generic [ref=e149]:
+              - generic [ref=e150]:
+                - paragraph [ref=e151]: Command conversation
+                - paragraph [ref=e152]: Simple chat surface for sending prompts and reading replies.
+              - generic [ref=e270]: Session chat_admin_20260327163533
+            - generic [ref=e154]:
+              - generic [ref=e271]:
+                - generic [ref=e272]:
+                  - paragraph [ref=e275]: hjh
+                  - paragraph [ref=e276]: 3/28/2026, 1:35:06 AM
+                - img [ref=e278]
+              - generic [ref=e281]:
+                - img [ref=e283]
+                - generic [ref=e286]:
+                  - paragraph [ref=e289]: "[LLM unavailable] Error 22 connecting to localhost:6379. The remote computer refused the network connection."
+                  - paragraph [ref=e290]: 3/28/2026, 1:35:11 AM
+              - generic [ref=e291]:
+                - generic [ref=e292]:
+                  - paragraph [ref=e295]: ljljk
+                  - paragraph [ref=e296]: 3/28/2026, 1:51:51 AM
+                - img [ref=e298]
+              - generic [ref=e301]:
+                - img [ref=e303]
+                - generic [ref=e306]:
+                  - paragraph [ref=e309]: "[LLM unavailable] Error 22 connecting to localhost:6379. The remote computer refused the network connection."
+                  - paragraph [ref=e310]: 3/28/2026, 1:51:55 AM
+            - generic [ref=e159]:
+              - generic [ref=e160]:
+                - generic [ref=e161]:
+                  - combobox [ref=e312]:
+                    - generic [ref=e313]:
+                      - img [ref=e315]
+                      - generic [ref=e320]: Deepseek R1:1.5b
+                    - img [ref=e321]
+                  - combobox [ref=e323]
+                - generic [ref=e170]:
+                  - combobox [ref=e325]:
+                    - generic [ref=e326]:
+                      - img [ref=e328]
+                      - generic [ref=e332]: Manual approvals
+                    - img [ref=e333]
+                  - combobox [ref=e335]
+              - generic [ref=e336]:
+                - generic [ref=e337]:
+                  - generic [ref=e338]:
+                    - paragraph [ref=e339]: Task flow
+                    - paragraph [ref=e340]: Appears only while real work is active.
+                  - generic [ref=e341]:
+                    - generic [ref=e342]:
+                      - generic [ref=e343]: Queue
+                      - generic [ref=e344]: "4"
+                    - button "Refresh" [ref=e345]:
+                      - img [ref=e346]
+                      - generic [ref=e351]: Refresh
+                    - button "Minimize" [ref=e352]:
+                      - img [ref=e353]
+                    - button "Close" [ref=e355]:
+                      - img [ref=e356]
+                - generic [ref=e360]:
+                  - generic [ref=e362]:
+                    - paragraph [ref=e363]: Mission queue
+                    - paragraph [ref=e364]: Simple ordered steps parsed from the conversation.
+                  - generic [ref=e365]:
+                    - generic [ref=e366]:
+                      - button "Reorder step 1" [ref=e367]:
+                        - img [ref=e368]
+                      - generic [ref=e375]: "1"
+                      - generic [ref=e377]:
+                        - generic [ref=e378]:
+                          - paragraph [ref=e379]: hi
+                          - paragraph [ref=e380]: Queued from the command conversation.
+                        - generic [ref=e381]:
+                          - generic [ref=e382]:
+                            - img [ref=e383]
+                            - text: Running
+                          - button "Mark complete" [ref=e385]:
+                            - img [ref=e386]
+                          - button "Remove step" [ref=e388]:
+                            - img [ref=e389]
+                    - generic [ref=e392]:
+                      - button "Reorder step 2" [ref=e393]:
+                        - img [ref=e394]
+                      - generic [ref=e401]: "2"
+                      - generic [ref=e403]:
+                        - generic [ref=e404]:
+                          - paragraph [ref=e405]: hi
+                          - paragraph [ref=e406]: No response yet from gateway. Check backend health and model status.
+                        - generic [ref=e407]:
+                          - generic [ref=e408]:
+                            - img [ref=e409]
+                            - text: Blocked
+                          - button "Mark complete" [ref=e412]:
+                            - img [ref=e413]
+                          - button "Remove step" [ref=e415]:
+                            - img [ref=e416]
+                    - generic [ref=e419]:
+                      - button "Reorder step 3" [ref=e420]:
+                        - img [ref=e421]
+                      - generic [ref=e428]: "3"
+                      - generic [ref=e430]:
+                        - generic [ref=e431]:
+                          - paragraph [ref=e432]: jkhkj
+                          - paragraph [ref=e433]: Queued from the command conversation.
+                        - generic [ref=e434]:
+                          - generic [ref=e435]:
+                            - img [ref=e436]
+                            - text: Running
+                          - button "Mark complete" [ref=e438]:
+                            - img [ref=e439]
+                          - button "Remove step" [ref=e441]:
+                            - img [ref=e442]
+                    - generic [ref=e445]:
+                      - button "Reorder step 4" [ref=e446]:
+                        - img [ref=e447]
+                      - generic [ref=e454]: "4"
+                      - generic [ref=e456]:
+                        - generic [ref=e457]:
+                          - paragraph [ref=e458]: hi
+                          - paragraph [ref=e459]: No response yet from gateway. Check backend health and model status.
+                        - generic [ref=e460]:
+                          - generic [ref=e461]:
+                            - img [ref=e462]
+                            - text: Blocked
+                          - button "Mark complete" [ref=e465]:
+                            - img [ref=e466]
+                          - button "Remove step" [ref=e468]:
+                            - img [ref=e469]
+              - generic [ref=e178]:
+                - button "Attach file" [ref=e179]:
+                  - img [ref=e180]
+                - textbox "Type a message or /run <tool> <target>..." [ref=e183]
+                - button [disabled] [ref=e184]:
+                  - img [ref=e185]
+              - generic [ref=e187]:
+                - generic [ref=e188]: Command mode
+                - generic [ref=e189]: 0 characters
+  - button "Open Next.js Dev Tools" [ref=e195] [cursor=pointer]:
+    - img [ref=e196]
+  - alert [ref=e472]
